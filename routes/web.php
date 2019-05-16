@@ -26,9 +26,9 @@ Route::any('test/ajax','Test\TestController@ajaxTest');
 
 //注册
 Route::get('reg','User\UserController@register');
-Route::any('regAdd','User\UserController@registerAdd');
+Route::post('regAdd','User\UserController@registerAdd');
 
 Route::get('login','User\UserController@login');
-Route::any('logindo','User\UserController@logindo');
+Route::post('logindo','User\UserController@logindo');
 
 
