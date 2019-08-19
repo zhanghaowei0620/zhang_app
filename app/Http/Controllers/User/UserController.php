@@ -88,11 +88,18 @@ class UserController extends Controller
     }
 
     public function logindo(){
-        $data = file_get_contents('php://input');
-        $info = json_decode($data,true);
+//        $pwd = password_hash('123456',PASSWORD_BCRYPT);
+//        var_dump($pwd);exit;
+        $enc_data = file_get_contents('php://input');
+        //解密
+        $public_key = openssl_get_publickey('file://'.storage_path('app/keys/public.pem'));
+        openssl_public_decrypt($enc_data,$dec_data,$public_key);
+        $info = json_decode($dec_data,true);
         $email = $info['email'];
-        $user_pwd = $info['user_pwd'];
+        //var_dump($email);exit;
+        $user_pwd = $info['pwd'];
         $passInfo = DB::table('user_info')->where('email',$email)->first();
+        //var_dump($passInfo);exit;
         if(empty($email)){
             $response = [
                 'error'=>50004,
@@ -130,18 +137,14 @@ class UserController extends Controller
             $response = [
                 'error'=>0,
                 'msg'=>'登陆成功',
-                'token'=>$token
+                'data'=>[
+                    'token'=>$token
+                ]
             ];
 
-
-            $id = Redis::incr('id');
-            $hsetkey = "id_{$id}";
-            $keylist = "H:user_login";
-            Redis::hset($hsetkey,'id',$id);
-            Redis::hset($hsetkey,'user_id',$uid);
-            Redis::hset($hsetkey,'token',$token);
-            Redis::hset($hsetkey,'createtime',time());
-            Redis::lpush($keylist,$hsetkey);
+            $key = "H:user_login";
+            Redis::set($key,$token);
+            Redis::expire($key,86400*3);
 
 
             die(json_encode($response,JSON_UNESCAPED_UNICODE));
