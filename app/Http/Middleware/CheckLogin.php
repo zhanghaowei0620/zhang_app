@@ -19,15 +19,15 @@ class CheckLogin
 //        $token = $request->input('token');
 //        $uid = $request->input('uid');
         $keylist = "H:user_login";
-        $t = Redis::lrange($keylist,0,-1);
+        $token = Redis::get($keylist);
 //        var_dump($t);exit;
-        foreach ($t as $k=>$v){
-            $arr = Redis::hgetall($v);
-        }
-        $token = $arr['token'];
-        $uid = $arr['uid'];
+//        foreach ($t as $k=>$v){
+//            $arr = Redis::hgetall($v);
+//        }
+//        $token = $arr['token'];
+//        $uid = $arr['uid'];
 
-        if(empty($token) || empty($uid)){
+        if(empty($token)){
             $response = [
                 'error'=>40003,
                 'msg'=>'未授权'
@@ -49,10 +49,10 @@ class CheckLogin
             die(json_encode($response,JSON_UNESCAPED_UNICODE));
         }else{
             $user_key = "H:user_login";
-            $res = Redis::lrange($user_key,0,-1);
-            $key_id = $res[0];
-            $userInfo = Redis::hgetall($key_id);
-            $user_token = $userInfo['token'];
+            $user_token = Redis::get($user_key);
+            ///$key_id = $res[0];
+            //$userInfo = Redis::hgetall($key_id);
+            //$user_token = $userInfo['token'];
             if(empty($user_token)){
                 $response = [
                     'error'=>40004,
